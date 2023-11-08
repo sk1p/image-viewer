@@ -5,6 +5,8 @@ import click
 import panel as pn
 
 from . import APP_FILE
+from .auth import TokenAuthProvider
+
 
 @click.command()
 @click.option('-p', '--port', help='port',
@@ -20,8 +22,10 @@ def serve(port: int, token_path: str | None):
         with token_path.open('r') as fp:
             token = fp.read()
             print('Using token auth')
+        auth = TokenAuthProvider(token=token)
     if token is None:
         print('No token auth')
+        auth = None
     pn.state.as_cached(
         key='api_token',
         fn=(lambda: token),
@@ -31,4 +35,5 @@ def serve(port: int, token_path: str | None):
         port=port,
         websocket_origin='*',
         show=False,
+        auth_provider=auth,
     )
